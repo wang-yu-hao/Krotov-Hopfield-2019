@@ -57,9 +57,9 @@ def draw_weights(synapses, Kx, Ky):
     plt.clf()
     nc=np.amax(np.absolute(HM))
     im=plt.imshow(HM,cmap='bwr',vmin=-nc,vmax=nc)
-    fig.colorbar(im,ticks=[np.amin(HM), 0, np.amax(HM)])
+    fig1.colorbar(im,ticks=[np.amin(HM), 0, np.amax(HM)])
     plt.axis('off')
-    fig.canvas.draw()   
+    fig1.canvas.draw()   
     
 
 eps0=4e-2    # learning rate
@@ -82,7 +82,7 @@ Default: p=2, k=2, delta=0.4 for 100-cell layer
 '''
 
 
-fig=plt.figure(figsize=(12.9,10))
+fig1=plt.figure(figsize=(12.9,10))
 
 
 synapses = np.random.normal(mu, sigma, (hid, N))  # Each row a hidden unit, entries are weights
@@ -147,7 +147,6 @@ for i in range(N_test):
     a /= np.amax(a)
     hid_output_test = np.concatenate((hid_output_test, np.maximum(a, np.zeros(a.shape))), axis = 0)
 
-
 #print(hid_output_train[1005])
 #print(label_train[1005])
 print(hid_output_train_rand[0])
@@ -156,8 +155,6 @@ print(hid_output_train_rand[1])
 print(label_train_rand[1])
 #print(hid_output_test[111])
 #print(label_test[111])
-
-
 
 '''
 Output layer.
@@ -175,13 +172,16 @@ label_train = keras.utils.to_categorical(label_train, num_classes = 10)
 label_train_rand = keras.utils.to_categorical(label_train_rand, num_classes = 10)
 label_test = keras.utils.to_categorical(label_test, num_classes = 10)
 
-for i in range(300):
-    output.fit(hid_output_train_rand, label_train_rand, epochs = 1, batch_size = 100)
-    score = output.evaluate(hid_output_test, label_test, batch_size = 100)
-    print(score)
+history = output.fit(hid_output_train_rand, label_train_rand, epochs = 300, batch_size = 100, validation_data = (hid_output_test, label_test))
+#score = output.evaluate(hid_output_test, label_test, batch_size = 100)
+acc = (history.history)['acc']
+val_acc = (history.history)['val_acc']
 
+error = np.ones(len(acc)) - acc
+val_error = np.ones(len(val_acc)) - val_acc
 
-
-
-
+fig2, ax1 = plt.subplots()
+ax1.plot(error)
+ax1.plot(val_error)
+plt.show()
 
