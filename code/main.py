@@ -22,7 +22,7 @@ N=784
 N_train = 60000
 N_test = 10000
 n = 5
-m = 8
+m = 6
 
 
 mnist_train=np.zeros((0,N))
@@ -62,7 +62,7 @@ def draw_weights(synapses, Kx, Ky):
     fig.canvas.draw()   
     
 
-eps0=2e-2    # learning rate
+eps0=4e-2    # learning rate
 Kx=10
 Ky=10
 '''
@@ -74,10 +74,10 @@ Nep=200      # number of epochs
 Num=100      # size of the minibatch
 prec=1e-30
 delta=0.4    # Strength of the anti-hebbian learning
-p=3.0        # Lebesgue norm of the weights
-k=5          # ranking parameter, must be integer that is bigger or equal than 2
+p=2.0        # Lebesgue norm of the weights
+k=3          # ranking parameter, must be integer that is bigger or equal than 2
 '''
-Optimal given in paper for 2000-cell layer: p=3, k=7, delta=0.4.
+Optimal hyperparameters given in paper for 2000-cell layer: eps0 = 4e-2, p=3, k=7, delta=0.4.
 Default: p=2, k=2, delta=0.4 for 100-cell layer
 '''
 
@@ -136,14 +136,15 @@ for i in range(N_train):
     a = np.power((np.dot(synapses, mnist_train[i])).reshape(1, hid), n)
     a_rand = np.power((np.dot(synapses, mnist_train[rand1[i]])).reshape(1, hid), n)
     # Normalization.
-#    a /= np.amax(a)    
+    a /= np.amax(a)
+    a_rand /= np.amax(a_rand)    
     hid_output_train = np.concatenate((hid_output_train, np.maximum(a, np.zeros(a.shape))), axis = 0)
     hid_output_train_rand = np.concatenate((hid_output_train_rand, np.maximum(a_rand, np.zeros(a_rand.shape))), axis = 0)
     label_train_rand = np.append(label_train_rand, label_train[rand1[i]])
 for i in range(N_test):
     a = np.power((np.dot(synapses, mnist_test[i])).reshape(1, hid), n)
     # Normalization.
-#    a /= np.amax(a)
+    a /= np.amax(a)
     hid_output_test = np.concatenate((hid_output_test, np.maximum(a, np.zeros(a.shape))), axis = 0)
 
 
@@ -164,7 +165,7 @@ Output layer.
 def customloss(y_True, y_Pred):
     diff = K.abs(y_True - y_Pred)
     return K.pow(diff, m)
-opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0000000055, amsgrad=False)
+opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
 # decay = 0.0000000055
 
 output = Sequential()
