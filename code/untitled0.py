@@ -1,14 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jul 12 15:10:07 2019
-
-@author: sebw
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Wed Jul 10 11:08:27 2019
 
 @author: sebw
@@ -20,6 +12,8 @@ import matplotlib.pyplot as plt
 from keras.models import Sequential
 from keras.layers import Dense, Activation
 import keras
+from keras import optimizers, losses
+import keras.backend as K
 
 mnist = scipy.io.loadmat('mnist_all.mat')
 
@@ -27,7 +21,8 @@ Nc=10
 N=784
 N_train = 60000
 N_test = 10000
-n = 1
+n = 5
+m = 8
 
 
 mnist_train=np.zeros((0,N))
@@ -70,6 +65,8 @@ def draw_weights(synapses, Kx, Ky):
 eps0=2e-2    # learning rate
 Kx=10
 Ky=10
+'''
+'''
 hid=Kx*Ky    # number of hidden units that are displayed in Ky by Kx array
 mu=0.0
 sigma=1.0
@@ -77,10 +74,11 @@ Nep=200      # number of epochs
 Num=100      # size of the minibatch
 prec=1e-30
 delta=0.4    # Strength of the anti-hebbian learning
-p=2.0        # Lebesgue norm of the weights
-k=2          # ranking parameter, must be integer that is bigger or equal than 2
+p=3.0        # Lebesgue norm of the weights
+k=5          # ranking parameter, must be integer that is bigger or equal than 2
 '''
-Optimal given in paper: p=3, k=7, delta=0.4.
+Optimal given in paper for 2000-cell layer: p=3, k=7, delta=0.4.
+Default: p=2, k=2, delta=0.4 for 100-cell layer
 '''
 
 
@@ -90,9 +88,9 @@ fig=plt.figure(figsize=(12.9,10))
 synapses = np.random.normal(mu, sigma, (hid, N))  # Each row a hidden unit, entries are weights
 for nep in range(Nep):
     eps=eps0*(1-nep/Nep)
-    mnist_train=mnist_train[np.random.permutation(N_train),:]
+    mnist_train_rand=mnist_train[np.random.permutation(N_train),:]
     for i in range(N_train//Num):
-        inputs=np.transpose(mnist_train[i*Num:(i+1)*Num,:]) # Each column vector is the input vector to a cell
+        inputs=np.transpose(mnist_train_rand[i*Num:(i+1)*Num,:]) # Each column vector is the input vector to a cell
         sig=np.sign(synapses)
         tot_input=np.dot(sig*np.absolute(synapses)**(p-1),inputs) # I in equation 3
         # Each row contains the I values of one cell from each example in the mini-batch
@@ -129,22 +127,54 @@ For 100-cell hidden unit: 60000 * 100 array for training, 10000 * 100 array for 
 '''
 hid_output_train = np.zeros((0, hid))
 hid_output_test = np.zeros((0, hid))
+hid_output_train_rand = np.zeros((0, hid))
+label_train_rand = np.zeros(0)
+label_test_rand = np.zeros(0)
+
+rand1 = np.random.permutation(N_train)
 for i in range(N_train):
-    hid_output_train = np.concatenate((hid_output_train, np.power((np.dot(synapses, mnist_train[i])).reshape(1, hid), n)), axis = 0)
+    a = np.power((np.dot(synapses, mnist_train[i])).reshape(1, hid), n)
+    a_rand = np.power((np.dot(synapses, mnist_train[rand1[i]])).reshape(1, hid), n)
+    # Normalization.
+#    a /= np.amax(a)    
+    hid_output_train = np.concatenate((hid_output_train, np.maximum(a, np.zeros(a.shape))), axis = 0)
+    hid_output_train_rand = np.concatenate((hid_output_train_rand, np.maximum(a_rand, np.zeros(a_rand.shape))), axis = 0)
+    label_train_rand = np.append(label_train_rand, label_train[rand1[i]])
 for i in range(N_test):
-    hid_output_test = np.concatenate((hid_output_test, np.power((np.dot(synapses, mnist_test[i])).reshape(1, hid), n)), axis = 0)
-    
+    a = np.power((np.dot(synapses, mnist_test[i])).reshape(1, hid), n)
+    # Normalization.
+#    a /= np.amax(a)
+    hid_output_test = np.concatenate((hid_output_test, np.maximum(a, np.zeros(a.shape))), axis = 0)
+
+
+#print(hid_output_train[1005])
+#print(label_train[1005])
+print(hid_output_train_rand[0])
+print(label_train_rand[0])
+print(hid_output_train_rand[1])
+print(label_train_rand[1])
+#print(hid_output_test[111])
+#print(label_test[111])
+
+
 
 '''
 Output layer.
 '''
+def customloss(y_True, y_Pred):
+    diff = K.abs(y_True - y_Pred)
+    return K.pow(diff, m)
+opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0000000055, amsgrad=False)
+# decay = 0.0000000055
+
 output = Sequential()
-output.add(Dense(10, activation = 'softmax'))
-output.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrix = ['accuracy'])
+output.add(Dense(10, activation = 'tanh', input_dim = hid))
+output.compile(optimizer = opt, loss = customloss, metrics = ['accuracy'])
 label_train = keras.utils.to_categorical(label_train, num_classes = 10)
+label_train_rand = keras.utils.to_categorical(label_train_rand, num_classes = 10)
 label_test = keras.utils.to_categorical(label_test, num_classes = 10)
 
-output.fit(hid_output_train, label_train, epochs = 300, batch_size = 100)
+output.fit(hid_output_train_rand, label_train_rand, epochs = 300, batch_size = 100)
 score = output.evaluate(hid_output_test, label_test, batch_size = 100)
 
 print(score)
