@@ -6,7 +6,7 @@ Created on Wed Jul 10 11:08:27 2019
 @author: sebw
 """
 
-import scipy
+import scipy.io
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
@@ -221,9 +221,10 @@ fig2, ax1 = plt.subplots()
 ax1.plot(error, label = 'train')
 ax1.plot(val_error, label = 'test')
 ax1.legend()
-plt.ylim(0, 3)
+plt.ylim(0, error[4])
 plt.xlabel('Number of epochs')
 plt.ylabel('Error %')
+plt.title('n = {}'.format(n))
 ax1.yaxis.set_major_formatter(mtick.PercentFormatter())
 
 fig1.savefig("weights.pdf")
