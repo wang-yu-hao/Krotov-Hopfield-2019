@@ -47,7 +47,7 @@ delta = 0.4
 p = 3.0
 # Ranking parameter, must be integer that is bigger or equal than 2.
 k = 7
-# Don't change.
+# For radomly generating initial weights. Don't change.
 mu = 0.0
 sigma = 1.0
 '''
@@ -227,8 +227,8 @@ plt.ylabel('Error %')
 plt.title('n = {}'.format(n))
 ax1.yaxis.set_major_formatter(mtick.PercentFormatter())
 
-fig1.savefig("weights.pdf")
-fig2.savefig("error.pdf")
+fig1.savefig("weights_{}_cells.pdf".format(hid))
+fig2.savefig("error_{}_cells.pdf".format(hid))
 
 
 
