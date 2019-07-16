@@ -6,7 +6,7 @@ Created on Wed Jul 10 11:08:27 2019
 @author: sebw
 """
 
-import scipy.io
+import scipy
 import numpy as np
 import matplotlib.pyplot as plt
 from keras.models import Sequential
@@ -21,7 +21,7 @@ Nc=10
 N=784
 N_train = 60000
 N_test = 10000
-n = 5
+n = 4.5
 m = 6
 
 
@@ -63,8 +63,8 @@ def draw_weights(synapses, Kx, Ky):
     
 
 eps0=4e-2    # learning rate
-Kx=6
-Ky=6
+Kx=5
+Ky=5
 '''
 '''
 hid=Kx*Ky    # number of hidden units that are displayed in Ky by Kx array
@@ -133,8 +133,12 @@ label_test_rand = np.zeros(0)
 
 rand1 = np.random.permutation(N_train)
 for i in range(N_train):
-    a = np.power((np.dot(synapses, mnist_train[i])).reshape(1, hid), n)
-    a_rand = np.power((np.dot(synapses, mnist_train[rand1[i]])).reshape(1, hid), n)
+    a = (np.dot(synapses, mnist_train[i])).reshape(1, hid)
+    for j in range(hid):
+        a[0, j] = a[0, j] ** n 
+    a_rand = (np.dot(synapses, mnist_train[rand1[i]])).reshape(1, hid)
+    for j in range(hid):
+        a_rand[0, j] = a_rand[0, j] ** n 
     # Normalization.
     a /= np.amax(a)
     a_rand /= np.amax(a_rand)    
@@ -142,7 +146,9 @@ for i in range(N_train):
     hid_output_train_rand = np.concatenate((hid_output_train_rand, np.maximum(a_rand, np.zeros(a_rand.shape))), axis = 0)
     label_train_rand = np.append(label_train_rand, label_train[rand1[i]])
 for i in range(N_test):
-    a = np.power((np.dot(synapses, mnist_test[i])).reshape(1, hid), n)
+    a = (np.dot(synapses, mnist_test[i])).reshape(1, hid)
+    for j in range(hid):
+        a[0, j] = a[0, j] ** n 
     # Normalization.
     a /= np.amax(a)
     hid_output_test = np.concatenate((hid_output_test, np.maximum(a, np.zeros(a.shape))), axis = 0)
@@ -162,26 +168,58 @@ Output layer.
 def customloss(y_True, y_Pred):
     diff = K.abs(y_True - y_Pred)
     return K.pow(diff, m)
-opt = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
+opt1 = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
+opt2 = keras.optimizers.Adam(lr=0.0005, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
+opt3 = keras.optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
+opt4 = keras.optimizers.Adam(lr=0.00005, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
+opt5 = keras.optimizers.Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
 # decay = 0.0000000055
 
 output = Sequential()
 output.add(Dense(10, activation = 'tanh', input_dim = hid))
-output.compile(optimizer = opt, loss = customloss, metrics = ['accuracy'])
 label_train = keras.utils.to_categorical(label_train, num_classes = 10)
 label_train_rand = keras.utils.to_categorical(label_train_rand, num_classes = 10)
 label_test = keras.utils.to_categorical(label_test, num_classes = 10)
 
-history = output.fit(hid_output_train_rand, label_train_rand, epochs = 300, batch_size = 100, validation_data = (hid_output_test, label_test))
+acc = np.zeros(0)
+val_acc = np.zeros(0)
+
+output.compile(optimizer = opt1, loss = customloss, metrics = ['accuracy'])
+history = output.fit(hid_output_train_rand, label_train_rand, epochs = 100, batch_size = 100, validation_data = (hid_output_test, label_test))
+acc = np.append(acc, (history.history)['acc'])
+val_acc = np.append(val_acc, (history.history)['val_acc'])
+
+output.compile(optimizer = opt2, loss = customloss, metrics = ['accuracy'])
+history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
+acc = np.append(acc, (history.history)['acc'])
+val_acc = np.append(val_acc, (history.history)['val_acc'])
+
+output.compile(optimizer = opt3, loss = customloss, metrics = ['accuracy'])
+history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
+acc = np.append(acc, (history.history)['acc'])
+val_acc = np.append(val_acc, (history.history)['val_acc'])
+
+output.compile(optimizer = opt4, loss = customloss, metrics = ['accuracy'])
+history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
+acc = np.append(acc, (history.history)['acc'])
+val_acc = np.append(val_acc, (history.history)['val_acc'])
+
+output.compile(optimizer = opt5, loss = customloss, metrics = ['accuracy'])
+history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
+acc = np.append(acc, (history.history)['acc'])
+val_acc = np.append(val_acc, (history.history)['val_acc'])
+
 #score = output.evaluate(hid_output_test, label_test, batch_size = 100)
-acc = (history.history)['acc']
-val_acc = (history.history)['val_acc']
+
 
 error = np.ones(len(acc)) - acc
 val_error = np.ones(len(val_acc)) - val_acc
 
 fig2, ax1 = plt.subplots()
-ax1.plot(error)
-ax1.plot(val_error)
+ax1.plot(error, label = 'Train')
+ax1.plot(val_error, label = 'Test')
+ax1.legend()
+'''
+'''
 plt.show()
 

@@ -12,6 +12,8 @@ import matplotlib.pyplot as plt
 a = np.array([1,2,3,2,1])
 b = np.array([5,6,7,8,9])
 
+a = a.reshape(1, 5)
+print(len(a))
 fig1 = plt.figure(0)
 plt.plot(a)
 
