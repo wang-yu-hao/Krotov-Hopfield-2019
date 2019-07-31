@@ -1,6 +1,9 @@
-Reconstruction of some key results from Krotov and Hopfield (2019) using the MNIST database. Adjust parameters in main.py as required and run to generate heat map of weights of unsupervised layer as in Fig.3 (left) and error-epoch graph as in Fig. 4.
+Open a terminal at the 'code' directory. Type 'make output/fig4a.pdf', 'make output/fig4b.pdf', 'make output/fig4c.pdf' to create individual graphs in the 'output' folder. Type 'make all' to create all three. Heat maps of a randomly selected group of 25 cells out of the 2000-cell 'biological' layer will also be made.
+
+Change value of Nep in main1.py to alter the number of epochs of unsupervised training. Default is 200 which should take several hours on a PC.
 
 
+References: 
 
 Krotov, D., & Hopfield, J. J. (2019). Unsupervised learning by competing hidden units. Proceedings of the National Academy of Sciences, 116(16), 7723-7731.
 
