@@ -122,7 +122,8 @@ for nep in range(Nep):
 
 print('Unsupervised training completed. Generating data for supervised training of output layer...')
 
-fig1.savefig("output/weights.pdf".format(hid))
+# fig1.savefig("output/weights.pdf".format(hid))
+fig1.savefig("output/weights.pdf")
 
 # Generate hidden layer output data with weights trained using unsupervised algorithm.
 # For 100-cell hidden unit: 60000 * 100 array for training, 10000 * 100 array for testing.

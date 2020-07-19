@@ -25,6 +25,7 @@ hid_output_test = np.load('hid_output_test.npy')
 label_train_rand = np.load('label_train_rand.npy')
 label_test = np.load('label_test.npy')
 
+
 hid = (np.shape(hid_output_train_rand))[1]
 beta = float(sys.argv[3])
 
@@ -44,11 +45,12 @@ hid_output_test *= beta
 def customloss(y_True, y_Pred):
     diff = K.abs(y_True - y_Pred)
     return K.pow(diff, m)
-opt1 = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
-opt2 = keras.optimizers.Adam(lr=0.0005, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
-opt3 = keras.optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
-opt4 = keras.optimizers.Adam(lr=0.00005, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
-opt5 = keras.optimizers.Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, epsilon=None, decay = 0.0, amsgrad=False)
+
+opt1 = keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, decay = 0.0, amsgrad=False)
+opt2 = keras.optimizers.Adam(lr=0.0005, beta_1=0.9, beta_2=0.999, decay = 0.0, amsgrad=False)
+opt3 = keras.optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, decay = 0.0, amsgrad=False)
+opt4 = keras.optimizers.Adam(lr=0.00005, beta_1=0.9, beta_2=0.999, decay = 0.0, amsgrad=False)
+opt5 = keras.optimizers.Adam(lr=0.00001, beta_1=0.9, beta_2=0.999, decay = 0.0, amsgrad=False)
 
 output = Sequential()
 output.add(Dense(10, 
@@ -63,28 +65,28 @@ val_acc = np.zeros(0)
 
 output.compile(optimizer = opt1, loss = customloss, metrics = ['accuracy'])
 history = output.fit(hid_output_train_rand, label_train_rand, epochs = 100, batch_size = 100, validation_data = (hid_output_test, label_test))
-acc = np.append(acc, (history.history)['acc'])
-val_acc = np.append(val_acc, (history.history)['val_acc'])
+acc = np.append(acc, (history.history)['accuracy'])
+val_acc = np.append(val_acc, (history.history)['val_accuracy'])
 
 output.compile(optimizer = opt2, loss = customloss, metrics = ['accuracy'])
 history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
-acc = np.append(acc, (history.history)['acc'])
-val_acc = np.append(val_acc, (history.history)['val_acc'])
+acc = np.append(acc, (history.history)['accuracy'])
+val_acc = np.append(val_acc, (history.history)['val_accuracy'])
 
 output.compile(optimizer = opt3, loss = customloss, metrics = ['accuracy'])
 history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
-acc = np.append(acc, (history.history)['acc'])
-val_acc = np.append(val_acc, (history.history)['val_acc'])
+acc = np.append(acc, (history.history)['accuracy'])
+val_acc = np.append(val_acc, (history.history)['val_accuracy'])
 
 output.compile(optimizer = opt4, loss = customloss, metrics = ['accuracy'])
 history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
-acc = np.append(acc, (history.history)['acc'])
-val_acc = np.append(val_acc, (history.history)['val_acc'])
+acc = np.append(acc, (history.history)['accuracy'])
+val_acc = np.append(val_acc, (history.history)['val_accuracy'])
 
 output.compile(optimizer = opt5, loss = customloss, metrics = ['accuracy'])
 history = output.fit(hid_output_train_rand, label_train_rand, epochs = 50, batch_size = 100, validation_data = (hid_output_test, label_test))
-acc = np.append(acc, (history.history)['acc'])
-val_acc = np.append(val_acc, (history.history)['val_acc'])
+acc = np.append(acc, (history.history)['accuracy'])
+val_acc = np.append(val_acc, (history.history)['val_accuracy'])
 
 #score = output.evaluate(hid_output_test, label_test, batch_size = 100)
 
